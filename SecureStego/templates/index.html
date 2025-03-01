@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Steganography App</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: #fff;
+      padding: 40px 50px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+    h1 {
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    h2 {
+      font-weight: 500;
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: 500;
+      color: #555;
+    }
+    .form-control, .form-control-file, textarea {
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    .btn-custom {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 30px;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    .btn-custom:hover {
+      background-color: #0056b3;
+    }
+    .result-box {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      word-wrap: break-word;
+      min-height: 100px;
+    }
+    .alert {
+      margin-top: 20px;
+    }
+    .nav-tabs .nav-link.active {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 50px 50px 0 0;
+    }
+    .nav-tabs .nav-link {
+      border: none;
+      color: #007bff;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Steganography App</h1>
+    <!-- Nav tabs to switch between Hide and Extract -->
+    <ul class="nav nav-tabs justify-content-center" id="stegoTabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="hide-tab" data-toggle="tab" href="#hide" role="tab" aria-controls="hide" aria-selected="true">Hide Data</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="extract-tab" data-toggle="tab" href="#extract" role="tab" aria-controls="extract" aria-selected="false">Extract Data</a>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="stegoTabsContent">
+      <!-- Hide Data Form -->
+      <div class="tab-pane fade show active" id="hide" role="tabpanel" aria-labelledby="hide-tab">
+        <h2>Hide a Secret Message</h2>
+        <form action="/hide" method="post" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="cover_image">Select Cover Image:</label>
+            <input type="file" class="form-control-file" name="cover_image" id="cover_image" required>
+          </div>
+          <div class="form-group">
+            <label for="secret_message">Secret Message:</label>
+            <textarea class="form-control" name="secret_message" id="secret_message" rows="4" required placeholder="Type your secret message here..."></textarea>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn btn-custom">Hide Data</button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Extract Data Form -->
+      <div class="tab-pane fade" id="extract" role="tabpanel" aria-labelledby="extract-tab">
+        <h2>Extract a Secret Message</h2>
+        <form action="/extract" method="post" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="stego_image">Select Stego Image:</label>
+            <input type="file" class="form-control-file" name="stego_image" id="stego_image" required>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn btn-custom">Extract Data</button>
+          </div>
+        </form>
+        <!-- Result Section -->
+        <div class="result-box mt-4">
+          <h5 class="text-center">Extracted Message:</h5>
+          <p class="text-center" style="font-size: 1.1rem; color: #333;">
+            {{ result or "Your secret message will appear here!" }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flash messages: Only show if not on the extract tab -->
+    {% if active_tab != 'extract' %}
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-info text-center" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    {% endif %}
+  </div>
+
+  <!-- Bootstrap JS, Popper.js, and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function(){
+        // Use active_tab from Flask; default to 'hide'
+        var activeTab = "{{ active_tab|default('hide') }}";
+        if(activeTab === "extract"){
+           $('#extract-tab').tab('show');
+        } else {
+           $('#hide-tab').tab('show');
+        }
+    });
+  </script>
+</body>
+</html>
