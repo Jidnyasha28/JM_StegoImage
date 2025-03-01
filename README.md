@@ -13,6 +13,8 @@ Contact
 Overview
 JM_StegoImage addresses the need for secure data transmission by integrating encryption and steganography. The project encrypts the user's secret message using Python's Cryptography (Fernet) library before embedding it into a cover image using an LSB (Least Significant Bit) technique. A web interface built with Flask and Bootstrap offers a user-friendly way to hide and extract secret messages, ensuring that even if hidden data is discovered, it remains protected.
 
+Most Useful when taken PNG Images.
+
 Features
 Dual-layer Security: Encrypts the message using secure Fernet encryption before embedding it into an image.
 
